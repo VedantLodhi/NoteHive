@@ -10,15 +10,13 @@ const app = express();
 // ✅ Middleware
 app.use(express.json());
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://notehive-frontend.vercel.app"
-  ],
+  origin: ["https://note-hive-nine.vercel.app"], // frontend live URL
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-app.options("*", cors());
+
+app.options("*", cors()); // preflight requests
 
 // ✅ Routes
 const authRoutes = require("./routes/authRoutes");
