@@ -27,7 +27,7 @@ const Register = ({ setUsername, setEmail }) => {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/initiate-registration", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/initiate-registration`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -57,7 +57,7 @@ const Register = ({ setUsername, setEmail }) => {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/verify-registration", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/verify-registration`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, otp }),
@@ -107,7 +107,7 @@ const Register = ({ setUsername, setEmail }) => {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/resend-otp", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, purpose: "registration" }),
