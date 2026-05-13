@@ -5,7 +5,7 @@ const emailConfig = {
     service: "gmail",
     host: "smtp.gmail.com",
     port: 587,
-    secure: true,
+    secure: false, // Changed from true to false for port 587
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
@@ -16,4 +16,3 @@ const emailConfig = {
 }
   
 module.exports = emailConfig
-  

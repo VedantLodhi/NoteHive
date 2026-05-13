@@ -1,42 +1,108 @@
-const { MongoClient } = require("mongodb")
-require("dotenv").config()
+const { MongoClient } = require("mongodb");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-let db // To store the database connection
+let db;
+let client;
 
 const connectDB = async () => {
   try {
-    // Check if MongoDB URI is available
-    if (!process.env.MONGO_URI) {
-      console.error("MONGO_URI environment variable is not set")
-      process.exit(1)
+    // First try DIRECT URI, otherwise SRV URI
+    const mongoUri =
+      process.env.MONGO_URI_DIRECT || process.env.MONGO_URI;
+
+    // Check env variables
+    if (!mongoUri) {
+      console.error(
+        "❌ Neither MONGO_URI nor MONGO_URI_DIRECT is set"
+      );
+      process.exit(1);
     }
 
-    const client = new MongoClient(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+    // Debug
+    console.log(
+      "Using Mongo URI:",
+      mongoUri.startsWith("mongodb://")
+        ? "DIRECT CONNECTION"
+        : "SRV CONNECTION"
+    );
 
-    await client.connect()
+    const clientOpts = {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      family: 4,
+    };
 
-    // Use DB_NAME from environment or default to "notehive"
-    const dbName = process.env.DB_NAME || "notehive"
-    db = client.db(dbName)
+    // Native MongoDB connection
+    client = new MongoClient(mongoUri, clientOpts);
 
-    console.log("✅ MongoDB Connected")
-    return db
+    await client.connect();
+
+    db = client.db();
+
+    // Mongoose connection
+    mongoose.set("strictQuery", true);
+
+    await mongoose.connect(mongoUri, clientOpts);
+
+    console.log(
+      "✅ MongoDB Atlas Connected Successfully"
+    );
   } catch (error) {
-    console.error("Database connection error:", error)
-    process.exit(1) // Exit process if connection fails
-  }
-}
+    console.error(
+      "❌ MongoDB Atlas connection error:"
+    );
 
-// Function to get the database instance
+    console.error(error);
+
+    // SRV DNS issue
+    if (
+      error.code === "ECONNREFUSED" &&
+      String(error.syscall || "").includes("querySrv")
+    ) {
+      console.error(`
+❌ SRV DNS lookup failed.
+
+Possible Fixes:
+1. Use mobile hotspot
+2. Turn VPN OFF
+3. Use mongodb:// connection string
+4. Check Atlas cluster is active
+5. Add IP in Atlas Network Access
+      `);
+    }
+
+    // Auth issue
+    if (
+      String(error.message || "")
+        .toLowerCase()
+        .includes("authentication")
+    ) {
+      console.error(`
+❌ MongoDB Authentication Failed
+
+Check:
+- Username
+- Password
+- Database user permissions
+      `);
+    }
+
+    process.exit(1);
+  }
+};
+
 const getDB = () => {
   if (!db) {
-    console.warn("Database not initialized. Attempting to connect...")
-    return null // Return null to allow the caller to handle this case
+    throw new Error(
+      "Database not initialized. Call connectDB() first."
+    );
   }
-  return db
-}
 
-module.exports = { connectDB, getDB }
+  return db;
+};
+
+module.exports = {
+  connectDB,
+  getDB,
+};

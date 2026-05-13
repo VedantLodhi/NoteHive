@@ -1,5 +1,5 @@
 const express = require("express");
-const { authenticate, authorizeAdmin } = require("../middlewares/authMiddleware");
+const { authenticate } = require("../middlewares/authMiddleware");
 const { createNote, getNotesBySubject, editNote, deleteNote, getNotes, getNoteById } = require("../controllers/notesController");
 
 const router = express.Router();
@@ -7,13 +7,13 @@ const router = express.Router();
 // ✅ Create a note (Any authenticated user can create notes)
 router.post("/notes", authenticate, createNote);
 
-// ✅ Get all notes (Any authenticated user can view notes)
+// ✅ Get all notes (authenticated; non-admins see only their notes)
 router.get("/notes", authenticate, getNotes);
 
-// ✅ Get notes by subject (Any authenticated user can view notes by subject)
+// ✅ Get notes by subject (authenticated; scoped like list)
 router.get("/notes/subject/:subject", authenticate, getNotesBySubject);
 
-// ✅ Get single note by ID (Any authenticated user can view a note)
+// ✅ Get single note by ID (authenticated; owner or admin)
 router.get("/notes/:id", authenticate, getNoteById);
 
 // ✅ Edit a note (Any authenticated user can edit their own notes)

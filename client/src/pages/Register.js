@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../css/Register.css";
+import { apiUrl } from "../config/apiBase";
 
 const Register = ({ setUsername, setEmail }) => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Register = ({ setUsername, setEmail }) => {
     setMessage("");
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/initiate-registration`, {
+      const response = await fetch(apiUrl("/api/auth/initiate-registration"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -57,7 +58,7 @@ const Register = ({ setUsername, setEmail }) => {
     setMessage("");
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/verify-registration`, {
+      const response = await fetch(apiUrl("/api/auth/verify-registration"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, otp }),
@@ -107,7 +108,7 @@ const Register = ({ setUsername, setEmail }) => {
     setMessage("");
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/resend-otp`, {
+      const response = await fetch(apiUrl("/api/auth/resend-otp"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, purpose: "registration" }),
@@ -141,6 +142,7 @@ const Register = ({ setUsername, setEmail }) => {
   };
 
   return (
+    <div className="nh-page-auth">
     <div className="register-form-container">
       <button className="close-btn" onClick={handleClose}>X</button>
       <h2>Register</h2>
@@ -235,6 +237,7 @@ const Register = ({ setUsername, setEmail }) => {
           Already have an account? <Link to="/login">Login</Link>
         </p>
       )}
+    </div>
     </div>
   );
 };

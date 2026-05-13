@@ -1,170 +1,5 @@
-
-
-// import React, { useState, useEffect } from "react";
-// import { Link, useNavigate, Outlet, useLocation } from "react-router-dom";
-// import {
-//   FaBars,
-//   FaTimes,
-//   FaMoon,
-//   FaSun,
-//   FaStickyNote,
-//   FaInfoCircle,
-//   FaPuzzlePiece,
-//   FaUsersCog,
-//   FaSignOutAlt,
-//   FaHome,
-// } from "react-icons/fa";
-
-// const Dashboard1 = () => {
-//   const [menuOpen, setMenuOpen] = useState(false);
-//   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
-//   const [username, setUsername] = useState(localStorage.getItem("username") || "");
-//   const [role, setRole] = useState("");
-//   const [profilePic, setProfilePic] = useState(
-//     localStorage.getItem("profilePic") || "https://via.placeholder.com/150"
-//   );
-//   const location = useLocation();
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const storedRole = localStorage.getItem("role")?.trim().toLowerCase();
-//     setRole(storedRole || "");
-//   }, []);
-
-//   useEffect(() => {
-//     document.body.classList.toggle("dark", darkMode);
-//     localStorage.setItem("darkMode", darkMode);
-//   }, [darkMode]);
-
-//   const toggleMenu = () => setMenuOpen(!menuOpen);
-//   const toggleDarkMode = () => setDarkMode((prev) => !prev);
-
-//   const handleLogout = () => {
-//     localStorage.clear();
-//     setUsername("");
-//     setRole("");
-//     setProfilePic("https://via.placeholder.com/150");
-//     navigate("/login");
-//     window.location.reload();
-//   };
-
-//   return (
-//     <div className={`flex h-screen ${darkMode ? "dark bg-gray-900 text-white" : "bg-gray-100 text-gray-800"}`}>
-//       {/* Sidebar */}
-//       <aside
-//         className={`w-64 bg-white dark:bg-gray-800 shadow-lg p-4 flex flex-col transition-transform duration-300 ease-in-out ${
-//           menuOpen ? "translate-x-0" : "-translate-x-full"
-//         } md:translate-x-0 fixed md:static z-40`}
-//       >
-//         <div className="flex items-center justify-between mb-6">
-//           <h1 className="text-2xl font-bold text-purple-600">NoteHive</h1>
-//           <button className="md:hidden" onClick={toggleMenu}>
-//             <FaTimes size={20} />
-//           </button>
-//         </div>
-
-//         <nav className="flex flex-col space-y-4">
-//           <Link to="/" className="hover:text-purple-600 flex items-center gap-2">
-//             <FaHome /> Home
-//           </Link>
-//           <Link to="about" className="hover:text-purple-600 flex items-center gap-2">
-//             <FaInfoCircle /> About
-//           </Link>
-//           <Link to="notes" className="hover:text-purple-600 flex items-center gap-2">
-//             <FaStickyNote /> Notes
-//           </Link>
-//           <Link to="cp-trivia" className="hover:text-purple-600 flex items-center gap-2">
-//             <FaPuzzlePiece /> Trivia
-//           </Link>
-
-//           {role === "admin" && (
-//             <>
-//               <Link to="/admin" className="hover:text-purple-600 flex items-center gap-2">
-//                 <FaUsersCog /> Admin Panel
-//               </Link>
-//               <Link to="/admin/noteManager" className="hover:text-purple-600 flex items-center gap-2">
-//                 <FaStickyNote /> Note Manager
-//               </Link>
-//             </>
-//           )}
-//         </nav>
-
-//         <div className="mt-auto pt-4 border-t border-gray-300 dark:border-gray-700">
-//           {username ? (
-//             <div className="flex items-center gap-3">
-//               <img
-//                 src={profilePic}
-//                 alt="profile"
-//                 className="w-10 h-10 rounded-full border-2 border-purple-500"
-//               />
-//               <div>
-//                 <p className="font-semibold">{username}</p>
-//                 <button
-//                   onClick={handleLogout}
-//                   className="text-sm text-red-500 hover:underline flex items-center gap-1"
-//                 >
-//                   <FaSignOutAlt /> Logout
-//                 </button>
-//               </div>
-//             </div>
-//           ) : (
-//             <div className="flex flex-col space-y-2">
-//               <Link to="login" className="text-purple-600 hover:underline">
-//                 Login
-//               </Link>
-//               <Link to="register" className="text-purple-600 hover:underline">
-//                 Sign Up
-//               </Link>
-//             </div>
-//           )}
-
-//           <button
-//             onClick={toggleDarkMode}
-//             className="mt-4 flex items-center gap-2 text-sm hover:text-purple-600 transition-colors"
-//           >
-//             {darkMode ? <FaSun /> : <FaMoon />} {darkMode ? "Light Mode" : "Dark Mode"}
-//           </button>
-//         </div>
-//       </aside>
-
-//       {/* Main Content */}
-//       <div className="flex-1 overflow-y-auto p-6 md:ml-64 transition-all">
-//         <div className="md:hidden mb-4">
-//           <button onClick={toggleMenu} className="text-xl text-purple-600">
-//             <FaBars />
-//           </button>
-//         </div>
-
-//         {/* Render either Outlet or Welcome Content */}
-//         {location.pathname === "/dashboard" ? (
-//           <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
-//             <div className="bg-gradient-to-br from-blue-100 via-white to-purple-100 p-1 rounded-3xl shadow-2xl w-full max-w-5xl">
-//               <div className="bg-white dark:bg-gray-800 dark:text-white rounded-3xl p-10 sm:p-12 text-center animate-fade-in">
-//                 <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-800 dark:text-white mb-6">
-//                   Welcome to Your Dashboard 🚀
-//                 </h2>
-//                 <p className="text-gray-600 dark:text-gray-300 text-lg sm:text-xl mb-10">
-//                   Your central hub for managing notes and user information.
-//                 </p>
-//                 <img
-//                   src="https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a?w=1000&q=80"
-//                   alt="Dashboard"
-//                   className="w-full object-cover max-h-[400px] rounded-2xl"
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//         ) : (
-//           <Outlet />
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard1;
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink as RouterNavLink, useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   FaBars,
   FaTimes,
@@ -177,9 +12,19 @@ import {
   FaSignOutAlt,
   FaHome,
   FaQuoteLeft,
+  FaUser,
+  FaPenFancy,
 } from "react-icons/fa";
 
-const Dashboard1 = () => {
+const navLinkClass = ({ isActive }) =>
+  [
+    "group flex items-center gap-3 rounded-nh-sm px-3 py-2.5 text-sm font-medium transition-all duration-200",
+    isActive
+      ? "bg-nh-accent-soft text-nh-text shadow-nh-soft border border-nh-border"
+      : "text-nh-muted hover:text-nh-text hover:bg-nh-surface-2/80 border border-transparent",
+  ].join(" ");
+
+const Dashboard1 = ({ username: appUsername } = {}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
   const [username, setUsername] = useState(localStorage.getItem("username") || "");
@@ -196,11 +41,15 @@ const Dashboard1 = () => {
   }, []);
 
   useEffect(() => {
+    if (appUsername) setUsername(appUsername);
+  }, [appUsername]);
+
+  useEffect(() => {
     document.body.classList.toggle("dark", darkMode);
     localStorage.setItem("darkMode", darkMode);
   }, [darkMode]);
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const toggleMenu = () => setMenuOpen((o) => !o);
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
   const handleLogout = () => {
@@ -212,158 +61,208 @@ const Dashboard1 = () => {
     window.location.reload();
   };
 
+  const closeMobileMenu = () => setMenuOpen(false);
+
   return (
-    <div className={`flex h-screen ${darkMode ? "dark bg-gray-900 text-white" : "bg-gray-100 text-gray-800"}`}>
-      {/* Sidebar */}
+    <div
+      className={`flex min-h-screen font-sans text-nh-text bg-nh-bg transition-colors duration-300 ${
+        darkMode ? "dark" : ""
+      }`}
+    >
+      {menuOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-stone-900/25 backdrop-blur-sm md:hidden"
+          aria-label="Close menu"
+          onClick={closeMobileMenu}
+        />
+      )}
+
       <aside
-        className={`w-64 bg-white dark:bg-gray-800 shadow-lg p-4 flex flex-col transition-transform duration-300 ease-in-out ${
-          menuOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:static z-40`}
+        className={[
+          "z-40 flex w-[min(18rem,88vw)] shrink-0 flex-col border-r border-nh-border bg-nh-surface/95 px-4 py-6 backdrop-blur-md transition-transform duration-300 ease-out md:static md:translate-x-0",
+          menuOpen ? "fixed inset-y-0 left-0 translate-x-0 shadow-nh" : "fixed -translate-x-full md:translate-x-0",
+        ].join(" ")}
       >
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-purple-600">NoteHive</h1>
-          <button className="md:hidden" onClick={toggleMenu}>
-            <FaTimes size={20} />
+        <div className="mb-8 flex items-center justify-between gap-2">
+          <Link
+            to="/"
+            className="font-display text-2xl tracking-tight text-nh-text transition-opacity hover:opacity-80"
+            onClick={closeMobileMenu}
+          >
+            NoteHive
+          </Link>
+          <button
+            type="button"
+            className="rounded-nh-sm p-2 text-nh-muted transition-colors hover:bg-nh-accent-soft hover:text-nh-text md:hidden"
+            onClick={closeMobileMenu}
+            aria-label="Close navigation"
+          >
+            <FaTimes size={18} />
           </button>
         </div>
 
-        <nav className="flex flex-col space-y-4">
-          <Link to="/" className="hover:text-purple-600 flex items-center gap-2">
-            <FaHome /> Home
-          </Link>
-          <Link to="about" className="hover:text-purple-600 flex items-center gap-2">
-            <FaInfoCircle /> About
-          </Link>
-          <Link to="notes" className="hover:text-purple-600 flex items-center gap-2">
-            <FaStickyNote /> Notes
-          </Link>
-          <Link to="cp-trivia" className="hover:text-purple-600 flex items-center gap-2">
-            <FaPuzzlePiece /> Trivia
-          </Link>
-
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-nh-muted">Menu</p>
+        <nav className="flex flex-col gap-1" onClick={closeMobileMenu}>
+          <RouterNavLink to="/" end className={({ isActive }) => navLinkClass({ isActive })}>
+            <FaHome className="opacity-70 group-hover:opacity-100" aria-hidden />
+            Home
+          </RouterNavLink>
+          <RouterNavLink to="about" className={({ isActive }) => navLinkClass({ isActive })}>
+            <FaInfoCircle className="opacity-70 group-hover:opacity-100" aria-hidden />
+            About
+          </RouterNavLink>
+          <RouterNavLink to="notes" className={({ isActive }) => navLinkClass({ isActive })}>
+            <FaStickyNote className="opacity-70 group-hover:opacity-100" aria-hidden />
+            Notes
+          </RouterNavLink>
+          <RouterNavLink to="cp-trivia" className={({ isActive }) => navLinkClass({ isActive })}>
+            <FaPuzzlePiece className="opacity-70 group-hover:opacity-100" aria-hidden />
+            Trivia &amp; Quiz
+          </RouterNavLink>
+          {username && (
+            <RouterNavLink to="/profile" className={({ isActive }) => navLinkClass({ isActive })}>
+              <FaUser className="opacity-70 group-hover:opacity-100" aria-hidden />
+              Profile
+            </RouterNavLink>
+          )}
+          {username && (
+            <RouterNavLink to="create-note" className={({ isActive }) => navLinkClass({ isActive })}>
+              <FaPenFancy className="opacity-70 group-hover:opacity-100" aria-hidden />
+              Create note
+            </RouterNavLink>
+          )}
           {role === "admin" && (
             <>
-              <Link to="/admin" className="hover:text-purple-600 flex items-center gap-2">
-                <FaUsersCog /> Admin Panel
-              </Link>
-              <Link to="/admin/noteManager" className="hover:text-purple-600 flex items-center gap-2">
-                <FaStickyNote /> Note Manager
-              </Link>
+              <RouterNavLink to="/admin" className={({ isActive }) => navLinkClass({ isActive })}>
+                <FaUsersCog className="opacity-70 group-hover:opacity-100" aria-hidden />
+                Admin
+              </RouterNavLink>
+              <RouterNavLink to="/admin/noteManager" className={({ isActive }) => navLinkClass({ isActive })}>
+                <FaStickyNote className="opacity-70 group-hover:opacity-100" aria-hidden />
+                Note manager
+              </RouterNavLink>
             </>
           )}
         </nav>
 
-        <div className="mt-auto pt-4 border-t border-gray-300 dark:border-gray-700">
+        <div className="nh-divider my-6" />
+
+        <div className="mt-auto space-y-4">
           {username ? (
-            <div className="flex items-center gap-3">
-              <img
-                src={profilePic}
-                alt="profile"
-                className="w-10 h-10 rounded-full border-2 border-purple-500"
-              />
-              <div>
-                <p className="font-semibold">{username}</p>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-red-500 hover:underline flex items-center gap-1"
-                >
-                  <FaSignOutAlt /> Logout
-                </button>
+            <div className="nh-card rounded-nh-sm p-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src={profilePic}
+                  alt=""
+                  className="h-11 w-11 shrink-0 rounded-full border border-nh-border-strong object-cover"
+                />
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="truncate text-sm font-semibold text-nh-text">{username}</p>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium text-nh-danger transition hover:underline"
+                  >
+                    <FaSignOutAlt className="shrink-0" aria-hidden />
+                    Log out
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col space-y-2">
-              <Link to="login" className="text-purple-600 hover:underline">
-                Login
+            <div className="flex flex-col gap-2">
+              <Link
+                to="/login"
+                className="nh-btn nh-btn-primary w-full justify-center text-sm"
+                onClick={closeMobileMenu}
+              >
+                Sign in
               </Link>
-              <Link to="register" className="text-purple-600 hover:underline">
-                Sign Up
+              <Link
+                to="/register"
+                className="nh-btn nh-btn-outline w-full justify-center text-sm"
+                onClick={closeMobileMenu}
+              >
+                Create account
               </Link>
             </div>
           )}
 
           <button
+            type="button"
             onClick={toggleDarkMode}
-            className="mt-4 flex items-center gap-2 text-sm hover:text-purple-600 transition-colors"
+            className="flex w-full items-center justify-center gap-2 rounded-nh-sm border border-nh-border bg-nh-surface-2/50 py-2.5 text-sm text-nh-muted transition hover:border-nh-accent hover:text-nh-text"
           >
-            {darkMode ? <FaSun /> : <FaMoon />} {darkMode ? "Light Mode" : "Dark Mode"}
+            {darkMode ? <FaSun aria-hidden /> : <FaMoon aria-hidden />}
+            {darkMode ? "Light appearance" : "Dark appearance"}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-6 md:ml-64 transition-all">
-        <div className="md:hidden mb-4">
-          <button onClick={toggleMenu} className="text-xl text-purple-600">
-            <FaBars />
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-nh-border bg-nh-surface/80 px-4 py-3 backdrop-blur-md md:hidden">
+          <button
+            type="button"
+            className="rounded-nh-sm p-2 text-nh-text transition hover:bg-nh-accent-soft"
+            onClick={toggleMenu}
+            aria-label="Open navigation"
+          >
+            <FaBars size={20} />
           </button>
-        </div>
+          <span className="font-display text-lg text-nh-text">NoteHive</span>
+          <span className="w-10" aria-hidden />
+        </header>
 
-        {/* Welcome Content */}
-        {location.pathname === "/dashboard" ? (
-          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
-            <div className="bg-gradient-to-br from-blue-100 via-white to-purple-100 p-1 rounded-3xl shadow-2xl w-full max-w-5xl animate-fade-in-up">
-              <div className="bg-white dark:bg-gray-800 dark:text-white rounded-3xl p-8 sm:p-12 relative overflow-hidden">
-                {/* Animated background elements */}
-                <div className="absolute inset-0 overflow-hidden opacity-10">
-                  {[...Array(12)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-8 h-8 bg-purple-300 rounded-full animate-float"
-                      style={{
-                        top: `${Math.random() * 100}%`,
-                        left: `${Math.random() * 100}%`,
-                        animationDelay: `${i * 2}s`,
-                      }}
-                    />
-                  ))}
-                </div>
+        <main className="flex-1 overflow-y-auto">
+          {location.pathname === "/dashboard" ? (
+            <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 py-16 md:py-24">
+              <div className="nh-glass-panel relative max-w-3xl overflow-hidden p-8 sm:p-12 md:p-14">
+                <div
+                  className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-nh-accent-soft blur-3xl"
+                  aria-hidden
+                />
+                <div
+                  className="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-nh-accent-soft blur-3xl opacity-80"
+                  aria-hidden
+                />
 
-                <div className="relative space-y-8">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-                      Welcome to NoteHive 🐝
-                    </h2>
-                    <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300">
-                      Your organized space for notes, trivia, and productivity
-                    </p>
-                  </div>
+                <div className="relative space-y-8 text-center">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-nh-muted">Dashboard</p>
+                  <h2 className="font-display text-4xl text-nh-text sm:text-5xl">Welcome to NoteHive</h2>
+                  <p className="mx-auto max-w-lg text-lg leading-relaxed text-nh-muted">
+                    Your quiet space for notes, practice quizzes, and focused study.
+                  </p>
 
-                  <div className="relative bg-purple-50 dark:bg-gray-700 rounded-2xl p-8 shadow-inner">
-                    <div className="absolute top-4 left-4 text-purple-400">
-                      <FaQuoteLeft size={24} />
-                    </div>
-                    <blockquote className="text-2xl italic text-center text-gray-800 dark:text-gray-200">
-                      "Productivity is never an accident. It is always the result of a commitment to excellence, intelligent planning, and focused effort."
+                  <div className="relative rounded-nh border border-nh-border bg-nh-surface-2/40 p-8 text-left shadow-nh-soft">
+                    <FaQuoteLeft className="mb-4 text-nh-accent opacity-60" aria-hidden />
+                    <blockquote className="font-display text-xl italic leading-snug text-nh-text sm:text-2xl">
+                      Productivity is never an accident. It is always the result of a commitment to excellence,
+                      intelligent planning, and focused effort.
                     </blockquote>
-                    <p className="mt-4 text-right text-gray-600 dark:text-gray-400">
-                      – Paul J. Meyer
-                    </p>
+                    <p className="mt-4 text-right text-sm text-nh-muted">— Paul J. Meyer</p>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    {['Notes', 'Trivia', 'Organization', 'Productivity'].map((item) => (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {["Notes", "Trivia", "Clarity", "Focus"].map((item) => (
                       <div
                         key={item}
-                        className="p-4 bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                        className="rounded-nh-sm border border-nh-border bg-nh-surface-2/30 px-3 py-4 text-center text-sm font-semibold text-nh-text shadow-nh-soft transition hover:border-nh-accent hover:shadow-nh"
                       >
-                        <span className="text-purple-600 dark:text-purple-400 font-semibold">
-                          {item}
-                        </span>
+                        {item}
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <Outlet />
-        )}
+          ) : (
+            <Outlet />
+          )}
+        </main>
       </div>
     </div>
   );
 };
 
 export default Dashboard1;
-

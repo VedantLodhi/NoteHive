@@ -1,5 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
+import { getApiOrigin } from "./config/apiBase";
 
+const origin = getApiOrigin();
 export const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: origin ? `${origin}/api` : "/api",
 });

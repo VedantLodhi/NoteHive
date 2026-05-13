@@ -6,6 +6,7 @@
     --primary: #415a77;
     --secondary: #1b263b;
     --hover-color: #546b8c;
+    --card-bg: #ffffff;
 }
 
 /* 🌙 Dark Mode */
@@ -16,6 +17,7 @@
     --primary: #415a77;
     --secondary: #778da9;
     --hover-color: #a0aec0;
+    --card-bg: #111827;
 }
 
 /* 🌟 Apply Theme */

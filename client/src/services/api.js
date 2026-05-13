@@ -1,39 +1,24 @@
-import axios from 'axios';
+import axios from "axios";
+import { apiUrl } from "../config/apiBase";
 
-// Set up the base URL for the API (make sure to change this if you deploy to production)
-const API_URL = 'http://localhost:5000/api/auth/';
+const authBase = () => apiUrl("/api/auth");
 
-// Register user
-// /src/services/api.js
 export const registerUser = async (formData) => {
-    try {
-      const response = await fetch('http://localhost:5000/register', {  // Replace with your backend URL
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to register user');
-      }
-  
-      return await response.json();  // Assuming your API returns a JSON response
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  };
-  
+  const response = await fetch(`${authBase()}/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData),
+  });
 
-// Login user
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || "Failed to register user");
+  }
+
+  return response.json();
+};
+
 export const loginUser = async (userData) => {
-    try {
-        // Send a POST request to the login route
-        const response = await axios.post(`${API_URL}login`, userData);
-        return response.data;
-    } catch (error) {
-        // Handle errors (return the error message from the backend)
-        throw error.response.data;
-    }
+  const response = await axios.post(`${authBase()}/login`, userData);
+  return response.data;
 };

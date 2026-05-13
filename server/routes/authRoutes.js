@@ -10,7 +10,7 @@ const {
   verifyLoginOTP,
   resendOTP,
 } = require("../controllers/authController")
-const { authMiddleware } = require("../middlewares/authMiddleware")
+const { authenticate } = require("../middlewares/authMiddleware")
 
 // OTP-based authentication routes
 router.post("/initiate-registration", initiateRegistration)
@@ -22,6 +22,6 @@ router.post("/resend-otp", resendOTP)
 // Original authentication routes (kept for backward compatibility)
 router.post("/register", register)
 router.post("/login", login)
-router.post("/logout", authMiddleware, logout)
+router.post("/logout", authenticate, logout)
 
 module.exports = router

@@ -31,9 +31,11 @@ const createNote = async (req, res) => {
 // ✅ Get Notes by Subject (Any authenticated user)
 const getNotesBySubject = async (req, res) => {
   try {
-    // Users can see all notes by subject, or modify to show only their notes:
-    // const notes = await Note.find({ subject: req.params.subject, createdBy: req.user._id }).sort({ createdAt: -1 });
-    const notes = await Note.find({ subject: req.params.subject }).sort({ createdAt: -1 });
+    let query = { subject: req.params.subject };
+    if (req.user.role !== "admin") {
+      query.createdBy = req.user._id;
+    }
+    const notes = await Note.find(query).sort({ createdAt: -1 });
     res.json(notes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -91,7 +93,6 @@ const deleteNote = async (req, res) => {
   }
 };
 
-// ✅ Get All Notes (Show user's own notes, or all notes if admin)
 const getNotes = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -99,12 +100,9 @@ const getNotes = async (req, res) => {
     const skip = (page - 1) * limit;
 
     let query = {};
-    
-    // If user is not admin, show only their notes
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== "admin") {
       query.createdBy = req.user._id;
     }
-    // If admin, show all notes (query remains empty)
 
     const notes = await Note.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
     res.json(notes);
@@ -123,10 +121,9 @@ const getNoteById = async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    // Optional: Restrict to user's own notes only
-    // if (note.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-    //   return res.status(403).json({ message: "Not authorized to view this note" });
-    // }
+    if (note.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to view this note" });
+    }
 
     res.status(200).json({ note });
   } catch (error) {

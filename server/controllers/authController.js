@@ -131,7 +131,6 @@ const verifyRegistrationOTP = async (req, res) => {
   }
 }
 
-// Initiate Login with OTP
 const initiateLogin = async (req, res) => {
   const { email } = req.body
 
@@ -200,10 +199,56 @@ const verifyLoginOTP = async (req, res) => {
     }
 
     // Verify password if provided
-    if (password) {
-      const isPasswordValid = await bcrypt.compare(password, user.password)
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Incorrect password." })
+    const verifyLoginOTP = async (req, res) => {
+      const { email, otp } = req.body
+    
+      if (!email || !otp) {
+        return res.status(400).json({
+          message: "Email and OTP are required.",
+        })
+      }
+    
+      try {
+        const isValid = await verifyOTP(email, otp, "login")
+    
+        if (!isValid) {
+          return res.status(400).json({
+            message: "Invalid or expired OTP.",
+          })
+        }
+    
+        const db = getDB()
+    
+        const usersCollection = db.collection("users")
+    
+        const user = await usersCollection.findOne({ email })
+    
+        if (!user) {
+          return res.status(400).json({
+            message: "No account found with this email.",
+          })
+        }
+    
+        await usersCollection.updateOne(
+          { email },
+          { $set: { loggedIn: true } }
+        )
+    
+        const token = generateToken(user._id, user.role)
+    
+        return res.status(200).json({
+          message: "Login successful!",
+          username: user.username,
+          role: user.role,
+          token,
+        })
+      } catch (error) {
+        console.error("OTP verification error:", error)
+    
+        return res.status(500).json({
+          message: "Failed to verify OTP.",
+          error: error.message,
+        })
       }
     }
 
@@ -263,22 +308,17 @@ const login = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    console.log("Received login request:", { email, password: password ? "Provided" : "Not Provided" })
-
     const db = getDB()
     if (!db) return res.status(500).json({ message: "Database connection error." })
 
     const usersCollection = db.collection("users")
 
     const user = await usersCollection.findOne({ email })
-    console.log("User found in DB:", user)
     if (!user) {
-      console.warn("No account found for email:", email)
       return res.status(400).json({ message: "No account found with this email." })
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password)
-    console.log("Password Match:", isPasswordValid)
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Incorrect password." })
@@ -287,7 +327,6 @@ const login = async (req, res) => {
     await usersCollection.updateOne({ email }, { $set: { loggedIn: true } })
 
     const token = generateToken(user._id, user.role)
-    console.log("Generated Token:", token)
 
     return res.status(200).json({
       message: "Login successful!",
@@ -309,8 +348,9 @@ const logout = async (req, res) => {
 
     const usersCollection = db.collection("users")
 
-    // Ensure _id is an ObjectId
-    await usersCollection.updateOne({ _id: new ObjectId(req.user.id) }, { $set: { loggedIn: false } })
+    const userId =
+      req.user._id instanceof ObjectId ? req.user._id : new ObjectId(String(req.user._id))
+    await usersCollection.updateOne({ _id: userId }, { $set: { loggedIn: false } })
 
     return res.status(200).json({ message: "Logout successful!" })
   } catch (error) {

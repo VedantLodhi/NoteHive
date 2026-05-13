@@ -1,0 +1,16 @@
+{
+  "name": "notehive",
+  "private": true,
+  "description": "Run client + API together for local development",
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm start --prefix server\" \"npm start --prefix client\"",
+    "start:server": "npm start --prefix server",
+    "start:client": "npm start --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../css/Login.css';
+import { apiUrl } from '../config/apiBase';
 
 const Login = ({ setUsername, setAdminUsername, role = 'user' }) => {
   const navigate = useNavigate();
@@ -11,13 +12,11 @@ const Login = ({ setUsername, setAdminUsername, role = 'user' }) => {
   const [showForm, setShowForm] = useState(true); // State to control form visibility
   const [step, setStep] = useState(1); // Step 1: Email input, Step 2: OTP verification
 
-  // Determine API endpoints based on role
-  const baseUrl = 'http://localhost:5000';
   const apiEndpoints = {
-    initiateLogin: role === 'admin' ? `${baseUrl}/admin/initiate-login` : `${baseUrl}/api/auth/initiate-login`,
-    verifyLogin: role === 'admin' ? `${baseUrl}/admin/verify-login` : `${baseUrl}/api/auth/verify-login`,
-    resendOtp: role === 'admin' ? `${baseUrl}/admin/resend-otp` : `${baseUrl}/api/auth/resend-otp`,
-    login: role === 'admin' ? `${baseUrl}/admin/login` : `${baseUrl}/api/auth/login` // Legacy endpoint
+    initiateLogin: role === 'admin' ? apiUrl('/admin/initiate-login') : apiUrl('/api/auth/initiate-login'),
+    verifyLogin: role === 'admin' ? apiUrl('/admin/verify-login') : apiUrl('/api/auth/verify-login'),
+    resendOtp: role === 'admin' ? apiUrl('/admin/resend-otp') : apiUrl('/api/auth/resend-otp'),
+    login: role === 'admin' ? apiUrl('/admin/login') : apiUrl('/api/auth/login'),
   };
   
   const redirectPath = role === 'admin' ? '/admin' : '/dashboard'; // Redirect users to dashboard after login
@@ -147,6 +146,7 @@ const Login = ({ setUsername, setAdminUsername, role = 'user' }) => {
   return (
     <>
       {showForm && (
+        <div className="nh-page-auth">
         <div className="login-form-container">
           <button className="close-btn" onClick={() => setShowForm(false)}>
             &times; {/* Cross symbol for close */}
@@ -231,6 +231,7 @@ const Login = ({ setUsername, setAdminUsername, role = 'user' }) => {
               <p>Not an admin? <Link to="/login">User Login</Link></p>
             )
           )}
+        </div>
         </div>
       )}
     </>

@@ -11,8 +11,8 @@ const FAQ = () => {
   return (
     <div className="faq-container">
       {/* Floating Button */}
-      <button className="faq-button" onClick={toggleFAQ}>
-        ❓
+      <button type="button" className="faq-button" onClick={toggleFAQ} aria-label="Open help and FAQ">
+        ?
       </button>
 
       {/* FAQ Popup */}
@@ -20,7 +20,9 @@ const FAQ = () => {
         <div className="faq-popup">
           <div className="faq-header">
             <h3>Frequently Asked Questions</h3>
-            <button className="close-btn" onClick={toggleFAQ}>✖</button>
+            <button type="button" className="close-btn" onClick={toggleFAQ} aria-label="Close FAQ">
+              ✕
+            </button>
           </div>
           <div className="faq-body">
             <p><strong>1. What is NoteHive?</strong><br /> NoteHive is a productivity app designed to help you manage notes and user information efficiently through an intuitive dashboard.</p>

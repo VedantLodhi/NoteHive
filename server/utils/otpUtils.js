@@ -1,36 +1,35 @@
-const crypto = require("crypto")
 const nodemailer = require("nodemailer")
 const { getDB } = require("../config/db")
-require("dotenv").config()
+const emailConfig = require("../config/email")
 
-// Generate a random 6-digit OTP
+// Generate 6-digit OTP
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
-// Store OTP in database with expiration time (10 minutes)
+// Store OTP in database with expiration
 const storeOTP = async (email, otp, purpose) => {
   try {
     const db = getDB()
-    if (!db) throw new Error("Database connection error.")
+    if (!db) throw new Error("Database connection error")
 
     const otpCollection = db.collection("otps")
-
-    // Delete any existing OTPs for this email and purpose
+    
+    // Delete any existing OTP for this email and purpose
     await otpCollection.deleteMany({ email, purpose })
 
-    // Store new OTP with expiration time
-    const expiresAt = new Date()
-    expiresAt.setMinutes(expiresAt.getMinutes() + 10) // 10 minutes expiration
-
+    // Store new OTP with 10 minutes expiration
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    
     await otpCollection.insertOne({
       email,
       otp,
-      purpose, // 'registration' or 'login'
-      expiresAt,
+      purpose,
       createdAt: new Date(),
+      expiresAt
     })
 
+    console.log(`OTP stored for ${email}: ${otp} (Purpose: ${purpose})`)
     return true
   } catch (error) {
     console.error("Error storing OTP:", error)
@@ -38,114 +37,183 @@ const storeOTP = async (email, otp, purpose) => {
   }
 }
 
-// Verify OTP from database
+// Verify OTP
 const verifyOTP = async (email, otp, purpose) => {
   try {
     const db = getDB()
-    if (!db) throw new Error("Database connection error.")
+    if (!db) throw new Error("Database connection error")
 
     const otpCollection = db.collection("otps")
-
+    
     const otpRecord = await otpCollection.findOne({
       email,
       otp,
       purpose,
-      expiresAt: { $gt: new Date() }, // Check if OTP hasn't expired
+      expiresAt: { $gt: new Date() } // Check if not expired
     })
 
-    if (!otpRecord) {
-      return false
+    if (otpRecord) {
+      // Delete the OTP after successful verification
+      await otpCollection.deleteOne({ _id: otpRecord._id })
+      console.log(`OTP verified and deleted for ${email}`)
+      return true
     }
 
-    // Delete the OTP after successful verification
-    await otpCollection.deleteOne({ _id: otpRecord._id })
-
-    return true
+    console.log(`OTP verification failed for ${email}`)
+    return false
   } catch (error) {
     console.error("Error verifying OTP:", error)
-    return false
+    throw error
   }
 }
 
 // Send OTP via email
+// const sendOTPEmail = async (email, otp, purpose) => {
+//   try {
+//     console.log("Email config:", emailConfig)
+//     console.log(`Attempting to send OTP ${otp} to ${email} for ${purpose}`)
+
+//     // Create transporter
+//     const transporter = nodemailer.createTransport(emailConfig)
+
+//     // Verify transporter configuration
+//     await transporter.verify()
+//     console.log("Email transporter verified successfully")
+
+//     // Email subject and content based on purpose
+//     let subject, html
+    
+//     if (purpose === "registration") {
+//       subject = "Complete Your Registration - OTP Verification"
+//       html = `
+//         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+//           <h2 style="color: #333; text-align: center;">Welcome! Complete Your Registration</h2>
+//           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+//             <p style="font-size: 16px; margin-bottom: 10px;">Your verification code is:</p>
+//             <div style="font-size: 32px; font-weight: bold; color: #007bff; text-align: center; letter-spacing: 5px; padding: 15px; background-color: white; border-radius: 4px;">
+//               ${otp}
+//             </div>
+//           </div>
+//           <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+//           <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+//         </div>
+//       `
+//     } else if (purpose === "login") {
+//       subject = "Login Verification - OTP Code"
+//       html = `
+//         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+//           <h2 style="color: #333; text-align: center;">Login Verification</h2>
+//           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+//             <p style="font-size: 16px; margin-bottom: 10px;">Your login verification code is:</p>
+//             <div style="font-size: 32px; font-weight: bold; color: #28a745; text-align: center; letter-spacing: 5px; padding: 15px; background-color: white; border-radius: 4px;">
+//               ${otp}
+//             </div>
+//           </div>
+//           <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+//           <p style="color: #666; font-size: 14px;">If you didn't request this, please secure your account immediately.</p>
+//         </div>
+//       `
+//     } else {
+//       subject = "Verification Code"
+//       html = `
+//         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+//           <h2 style="color: #333; text-align: center;">Verification Code</h2>
+//           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+//             <p style="font-size: 16px; margin-bottom: 10px;">Your verification code is:</p>
+//             <div style="font-size: 32px; font-weight: bold; color: #333; text-align: center; letter-spacing: 5px; padding: 15px; background-color: white; border-radius: 4px;">
+//               ${otp}
+//             </div>
+//           </div>
+//           <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+//         </div>
+//       `
+//     }
+
+//     // Email options
+//     const mailOptions = {
+//       from: `"Your App" <${emailConfig.auth.user}>`,
+//       to: email,
+//       subject: subject,
+//       html: html
+//     }
+
+//     // Send email
+//     const result = await transporter.sendMail(mailOptions)
+//     console.log("Email sent successfully:", result.messageId)
+//     console.log("Preview URL:", nodemailer.getTestMessageUrl(result))
+    
+//     return true
+//   } catch (error) {
+//     console.error("Error sending OTP email:", error)
+    
+//     // More detailed error logging
+//     if (error.code === 'EAUTH') {
+//       console.error("Authentication failed. Check your email credentials.")
+//     } else if (error.code === 'ESOCKET') {
+//       console.error("Network error. Check your internet connection.")
+//     } else if (error.responseCode === 534) {
+//       console.error("Gmail security: Use app-specific password or enable less secure apps.")
+//     }
+    
+//     throw error
+//   }
+// }
 const sendOTPEmail = async (email, otp, purpose) => {
   try {
-    // Check if email credentials are available
+    // If SMTP creds are missing, fall back to console log (dev mode)
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.error("Email credentials are missing. Check your environment variables.")
-
-      // For development/testing only - log the OTP instead of sending email
-      console.log(`[DEV MODE] OTP for ${email}: ${otp}`)
-      return true
+      console.warn("EMAIL_USER/EMAIL_PASSWORD not set. Falling back to console OTP log.")
+      console.log(`🔥 OTP FOR ${email}: ${otp} (Purpose: ${purpose})`)
+      return { success: true, mocked: true }
     }
 
-    // Create a transporter with more detailed configuration
-    const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE || "gmail",
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: process.env.EMAIL_PORT || 587,
-      secure: process.env.EMAIL_SECURE || false, // true for 465, false for other ports
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD, // Use App Password here
-      },
-      debug: true, // Show debug output
-      logger: true, // Log information into the console
-    })
+    const transporter = nodemailer.createTransport(emailConfig)
+    await transporter.verify()
 
-    // Verify transporter configuration
-    try {
-      await transporter.verify()
-      console.log("SMTP connection verified successfully")
-    } catch (error) {
-      console.error("Transporter verification failed:", error)
+    let subject
+    const accent = purpose === 'login' ? '#22c55e' : '#3b82f6'
+    if (purpose === 'registration') subject = 'Complete Your Registration - OTP Verification'
+    else if (purpose === 'login') subject = 'Login Verification - OTP Code'
+    else subject = 'Verification Code'
 
-      // For development/testing - log the OTP and continue
-      console.log(`[DEV MODE - FALLBACK] OTP for ${email}: ${otp}`)
-      return true
-    }
-
-    const subject = purpose === "registration" ? "Your Registration OTP Code" : "Your Login OTP Code"
-
-    const message =
-      purpose === "registration"
-        ? `Thank you for registering with our service. Your OTP code is: ${otp}. This code will expire in 10 minutes.`
-        : `Your login OTP code is: ${otp}. This code will expire in 10 minutes.`
-
-    // Send email
-    const mailOptions = {
-      from: `"NoteHive" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: subject,
-      text: message,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-          <h2 style="color: #333;">${subject}</h2>
-          <p style="font-size: 16px; color: #555;">Your verification code is:</p>
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; text-align: center; margin: 20px 0;">
-            <h1 style="font-size: 32px; margin: 0; color: #333;">${otp}</h1>
+    const html = `
+      <div style="font-family: Inter,Arial,sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
+        <h2 style="color:#111827; text-align:center; margin:0 0 12px;">${subject}</h2>
+        <div style="background:#f3f4f6; padding: 20px; border-radius: 12px; margin: 20px 0;">
+          <p style="font-size:16px; color:#374151; margin:0 0 8px;">Your one-time code is:</p>
+          <div style="font-size:36px; font-weight:800; color:${accent}; text-align:center; letter-spacing: 6px; padding: 16px; background:#ffffff; border-radius: 10px;">
+            ${otp}
           </div>
-          <p style="font-size: 14px; color: #777;">This code will expire in 10 minutes.</p>
-          <p style="font-size: 14px; color: #777;">If you didn't request this code, please ignore this email.</p>
         </div>
-      `,
+        <p style="color:#6b7280; font-size:14px; margin:0 0 4px;">This code will expire in 10 minutes.</p>
+        <p style="color:#6b7280; font-size:12px;">If you didn’t request this, you can ignore this email.</p>
+      </div>
+    `
+
+    const mailOptions = {
+      from: `"NoteHive" <${emailConfig.auth.user}>`,
+      to: email,
+      subject,
+      html
     }
 
-    const info = await transporter.sendMail(mailOptions)
-    console.log("Email sent successfully:", info.messageId)
-    return true
+    const result = await transporter.sendMail(mailOptions)
+    console.log("📧 OTP email sent:", result.messageId)
+    return { success: true, id: result.messageId }
   } catch (error) {
-    console.error("Error sending OTP email:", error)
-
-    // For development/testing only - log the OTP instead of failing
-    console.log(`[DEV MODE - FALLBACK] OTP for ${email}: ${otp}`)
-    return true // Return true to allow the flow to continue in development
+    console.error('Error in sendOTPEmail:', error)
+    if (error.code === 'EAUTH') console.error('Authentication failed. Use Gmail App Password for EMAIL_PASSWORD.')
+    if (error.code === 'ESOCKET') console.error('Network/SMTP socket error.')
+    if (error.responseCode === 534) console.error('Gmail 534: Use app-specific password or update security settings.')
+    // Graceful fallback so login/registration flow continues in dev
+    console.warn('Falling back to console OTP due to email error.')
+    console.log(`🔥 OTP FOR ${email}: ${otp} (Purpose: ${purpose})`)
+    return { success: true, mocked: true }
   }
-}
-
+};
 module.exports = {
   generateOTP,
   storeOTP,
   verifyOTP,
-  sendOTPEmail,
+  sendOTPEmail
 }

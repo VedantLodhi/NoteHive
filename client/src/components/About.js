@@ -1,35 +1,45 @@
-import React from 'react';
-import '../css/About.css';
+import React from "react";
+import "../css/About.css";
 
 const About = () => {
   return (
     <div className="about-container">
       <div className="about-header">
-        <h1>About This App</h1>
-        <p>Welcome to <strong>MyApp</strong>, where innovation meets simplicity.</p>
+        <h1>About NoteHive</h1>
+        <p>
+          A calm, editorial workspace for notes, quizzes, and personal study—built with clarity and longevity in mind.
+        </p>
       </div>
       <div className="about-content">
-        <p>MyApp is designed to offer a seamless user experience while tackling challenges and enhancing productivity. With a blend of modern technologies and intuitive design, MyApp is built to help you achieve your goals efficiently.</p>
+        <p>
+          NoteHive brings together structured note-taking and lightweight practice tools so you can capture ideas, revisit
+          them with ease, and reinforce learning without visual noise.
+        </p>
 
         <div className="features">
-          <h2>Key Features</h2>
+          <h2>Highlights</h2>
           <ul>
-            <li>User-friendly interface</li>
-            <li>Light and Dark theme support</li>
-            <li>Real-time updates and notifications</li>
-            <li>Responsive design for all devices</li>
+            <li>Minimal interface with generous typography and spacing</li>
+            <li>Light and dark appearances tuned for comfortable contrast</li>
+            <li>Responsive layouts from mobile to wide desktop</li>
+            <li>Notes, trivia, and profile in one cohesive experience</li>
           </ul>
         </div>
 
-        <p>The app was crafted using <strong>React.js</strong> and designed with a minimalist aesthetic to provide an enjoyable experience. Whether you're here to track tasks, explore new content, or improve your skills, MyApp is built for you.</p>
+        <p>
+          Crafted with <strong>React</strong> and a MERN stack, NoteHive focuses on readability, accessibility, and a
+          premium editorial feel inspired by modern productivity platforms.
+        </p>
       </div>
 
       <div className="about-footer">
-        <p>Created by <strong>Vedant Lodhi</strong></p>
-        <p>&copy; 2025</p>
+        <p>
+          Created by <strong>Vedant Lodhi</strong>
+        </p>
+        <p>&copy; 2026 NoteHive</p>
       </div>
     </div>
   );
-}
+};
 
 export default About;

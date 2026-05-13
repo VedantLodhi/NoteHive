@@ -4,17 +4,38 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
+
+function extractJsonArray(text) {
+  const trimmed = String(text).trim();
+  const fence = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  const inner = fence ? fence[1].trim() : trimmed;
+  const start = inner.indexOf("[");
+  const end = inner.lastIndexOf("]");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error("No JSON array found in model response");
+  }
+  return inner.slice(start, end + 1);
+}
 
 const generateTrivia = async (req, res) => {
   try {
+    if (!apiKey) {
+      return res.status(503).json({ error: "GEMINI_API_KEY is not configured on the server." });
+    }
+
     const { topic, difficulty, numQuestions } = req.body;
 
     if (!topic || !difficulty || !numQuestions) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+    });
+    
+    console.log("Using Gemini Model: gemini-2.0-flash");
 
     const prompt = `Generate ${numQuestions} unique multiple-choice quiz questions on the topic of ${topic} at ${difficulty} difficulty level.
     The questions should be different each time and should vary in phrasing. 
@@ -26,24 +47,29 @@ const generateTrivia = async (req, res) => {
     ]`;
 
     const result = await model.generateContent(prompt);
-    const textResponse = result.response.text();
+    // const textResponse = result.response.text();
+    const response = await result.response;
+const textResponse = response.text();
 
-    console.log("Raw API Response:", textResponse); // Debugging
+console.log("Gemini Response:", textResponse);
 
-    // ✅ *Fix: Remove unwanted markdown from JSON*
-    const cleanedJSON = textResponse.replace(/json|/g, "").trim();
+    const cleanedJSON = extractJsonArray(textResponse);
+    const quizData = JSON.parse(cleanedJSON);
 
-    try {
-      const quizData = JSON.parse(cleanedJSON);
-      res.json({ quizzes: quizData });
-    } catch (parseError) {
-      console.error("JSON Parse Error:", parseError);
-      res.status(500).json({ error: "Invalid AI response format" });
+    if (!Array.isArray(quizData)) {
+      return res.status(500).json({ error: "Invalid AI response format" });
     }
 
+    res.json({ quizzes: quizData });
   } catch (error) {
     console.error("Trivia Generation Error:", error);
-    res.status(500).json({ error: "Failed to generate quiz" });
+    if (error instanceof SyntaxError) {
+      return res.status(500).json({ error: "Invalid AI response format" });
+    }
+    // res.status(500).json({ error: "Failed to generate quiz" });
+    res.status(500).json({
+      error: error.message || "Failed to generate quiz",
+    });
   }
 };
 
