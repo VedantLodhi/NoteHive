@@ -21,43 +21,32 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3001",
 
-  // Vercel frontend
+  // Production frontend
   "https://note-hive-nine.vercel.app",
 ];
 
-// ✅ CORS setup
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow Postman / server-server requests
-      if (!origin) return callback(null, true);
+// ✅ Proper CORS setup
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Origin",
+    "X-Requested-With",
+    "Accept",
+    "Cache-Control",
+    "X-Access-Token",
+  ],
+};
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+app.use(cors(corsOptions));
 
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Origin",
-      "X-Requested-With",
-      "Accept",
-      "Cache-Control",
-      "X-Access-Token",
-    ],
-  })
-);
+// ✅ Handle preflight correctly
+app.options("*", cors(corsOptions));
 
-// ✅ Handle preflight
-app.options("*", cors());
-
-// ✅ Body parser
+// Body parser
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -76,25 +65,15 @@ app.use("/api", triviaRoutes);
 app.get("/", (req, res) => {
   res.json({
     message: "🚀 Server is running!",
-    endpoints: [
-      "/api/auth/initiate-registration",
-      "/api/auth/verify-registration-otp",
-      "/api/auth/initiate-login",
-      "/api/auth/verify-login-otp",
-    ],
   });
 });
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error("Error:", err.stack);
+  console.error(err.stack);
 
   res.status(500).json({
     message: "Something went wrong!",
-    error:
-      process.env.NODE_ENV === "development"
-        ? err.message
-        : "Internal server error",
   });
 });
 
@@ -109,13 +88,10 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(
-        `📧 Make sure your .env has EMAIL_USER and EMAIL_PASSWORD set`
-      );
-      console.log(`🔗 Test endpoint: http://localhost:${PORT}`);
     });
+
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error(" Failed to start server:", error);
     process.exit(1);
   }
 };
