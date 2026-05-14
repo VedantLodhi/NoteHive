@@ -14,37 +14,26 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allowed frontend origins
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:3001",
+// ✅ TEMP CORS FIX (allow all origins)
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Origin",
+      "X-Requested-With",
+      "Accept",
+      "Cache-Control",
+      "X-Access-Token",
+    ],
+  })
+);
 
-  // Production frontend
-  "https://note-hive-nine.vercel.app",
-];
-
-// ✅ Proper CORS setup
-const corsOptions = {
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "Origin",
-    "X-Requested-With",
-    "Accept",
-    "Cache-Control",
-    "X-Access-Token",
-  ],
-};
-
-app.use(cors(corsOptions));
-
-// ✅ Handle preflight correctly
-app.options("*", cors(corsOptions));
+// ✅ Handle preflight
+app.options("*", cors());
 
 // Body parser
 app.use(express.json({ limit: "10mb" }));
@@ -70,7 +59,7 @@ app.get("/", (req, res) => {
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Error:", err.stack);
 
   res.status(500).json({
     message: "Something went wrong!",
@@ -91,7 +80,7 @@ const startServer = async () => {
     });
 
   } catch (error) {
-    console.error(" Failed to start server:", error);
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 };
