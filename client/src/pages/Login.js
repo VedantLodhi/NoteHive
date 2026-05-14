@@ -1,237 +1,389 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import '../css/Login.css';
-import { apiUrl } from '../config/apiBase';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import "../css/Login.css";
+import { apiUrl } from "../config/apiBase";
 
-const Login = ({ setUsername, setAdminUsername, role = 'user' }) => {
+const Login = ({ setUsername, setAdminUsername, role = "user" }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [otp, setOtp] = useState('');
-  const [message, setMessage] = useState('');
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [otp, setOtp] = useState("");
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showForm, setShowForm] = useState(true); // State to control form visibility
-  const [step, setStep] = useState(1); // Step 1: Email input, Step 2: OTP verification
+  const [showForm, setShowForm] = useState(true);
+  const [step, setStep] = useState(1);
 
   const apiEndpoints = {
-    initiateLogin: role === 'admin' ? apiUrl('/admin/initiate-login') : apiUrl('/api/auth/initiate-login'),
-    verifyLogin: role === 'admin' ? apiUrl('/admin/verify-login') : apiUrl('/api/auth/verify-login'),
-    resendOtp: role === 'admin' ? apiUrl('/admin/resend-otp') : apiUrl('/api/auth/resend-otp'),
-    login: role === 'admin' ? apiUrl('/admin/login') : apiUrl('/api/auth/login'),
+    initiateLogin:
+      role === "admin"
+        ? apiUrl("/admin/initiate-login")
+        : apiUrl("/api/auth/initiate-login"),
+
+    verifyLogin:
+      role === "admin"
+        ? apiUrl("/admin/verify-login")
+        : apiUrl("/api/auth/verify-login"),
+
+    resendOtp:
+      role === "admin"
+        ? apiUrl("/admin/resend-otp")
+        : apiUrl("/api/auth/resend-otp"),
   };
-  
-  const redirectPath = role === 'admin' ? '/admin' : '/dashboard'; // Redirect users to dashboard after login
+
+  const redirectPath =
+    role === "admin" ? "/admin" : "/dashboard";
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
   };
 
-  // Step 1: Initiate login and request OTP
+  // STEP 1 -> SEND OTP
   const initiateLogin = async (e) => {
     e.preventDefault();
+
     setIsLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
-      const response = await fetch(apiEndpoints.initiateLogin, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
-      });
+      const response = await fetch(
+        apiEndpoints.initiateLogin,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email: formData.email,
+            password: "login",
+          }),
+        }
+      );
 
       const data = await response.json();
-      console.log("Login Initiation Response:", data);
+
+      console.log(
+        "Login Initiation Response:",
+        data
+      );
 
       if (response.ok) {
-        setStep(2); // Move to OTP verification step
-        setMessage('OTP sent to your email. Please check and enter below.');
+        setStep(2);
+
+        setMessage(
+          data.message ||
+            "OTP sent successfully"
+        );
       } else {
-        setMessage(data.message || 'Login initiation failed. Try again.');
+        setMessage(
+          data.message ||
+            "Login failed"
+        );
       }
     } catch (error) {
-      console.error("Login Initiation Error:", error);
-      setMessage('Server error. Please try again later.');
+      console.log(
+        "Login Initiation Error:",
+        error
+      );
+
+      setMessage(
+        "Server error. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Step 2: Verify OTP and complete login
+  // STEP 2 -> VERIFY OTP
+
   const verifyOtp = async (e) => {
     e.preventDefault();
+
     setIsLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
-      const response = await fetch(apiEndpoints.verifyLogin, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: formData.email, 
-          otp,
-          password: formData.password // Optional, depending on your backend implementation
-        }),
-      });
+      const response = await fetch(
+        apiEndpoints.verifyLogin,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email: formData.email,
+            otp,
+            password: formData.password,
+          }),
+        }
+      );
 
       const data = await response.json();
-      console.log("OTP Verification Response:", data);
+
+      console.log(
+        "OTP Verification:",
+        data
+      );
 
       if (response.ok) {
-        const storageKey = role === 'admin' ? 'adminToken' : 'token';
-        const usernameKey = role === 'admin' ? 'adminUsername' : 'username';
+        const tokenKey =
+          role === "admin"
+            ? "adminToken"
+            : "token";
 
-        localStorage.setItem(storageKey, data.token);
-        localStorage.setItem(usernameKey, data.username);
-        localStorage.setItem('role', data.role); // Store role in localStorage
+        const usernameKey =
+          role === "admin"
+            ? "adminUsername"
+            : "username";
 
-        if (role === 'admin') {
+        localStorage.setItem(
+          tokenKey,
+          data.token
+        );
+
+        localStorage.setItem(
+          usernameKey,
+          data.username
+        );
+
+        localStorage.setItem(
+          "role",
+          data.role
+        );
+
+        if (role === "admin") {
           setAdminUsername(data.username);
         } else {
           setUsername(data.username);
         }
 
-        setMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful! Redirecting...`);
+        setMessage(
+          "Login successful!"
+        );
 
-        setTimeout(() => {
-          navigate(redirectPath);
-        }, 1500);
+        // Removed delay
+        navigate(redirectPath);
       } else {
-        setMessage(data.message || 'OTP verification failed. Try again.');
+        setMessage(
+          data.message ||
+            "OTP verification failed"
+        );
       }
     } catch (error) {
-      console.error("OTP Verification Error:", error);
-      setMessage('Server error. Please try again later.');
+      console.log(
+        "OTP Verify Error:",
+        error
+      );
+
+      setMessage(
+        "Server error. Try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Request OTP resend
+  // RESEND OTP
+
   const resendOtp = async () => {
     setIsLoading(true);
-    setMessage('');
 
     try {
-      const response = await fetch(apiEndpoints.resendOtp, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, purpose: 'login' }),
-      });
+      const response = await fetch(
+        apiEndpoints.resendOtp,
+        {
+          method: "POST",
 
-      const data = await response.json();
-      console.log("Resend OTP Response:", data);
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            email: formData.email,
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
 
       if (response.ok) {
-        setMessage('OTP resent to your email. Please check and enter below.');
+        setMessage(
+          "OTP resent successfully"
+        );
       } else {
-        setMessage(data.message || 'Failed to resend OTP. Try again.');
+        setMessage(data.message);
       }
-    } catch (error) {
-      console.error("Resend OTP Error:", error);
-      setMessage('Server error. Please try again later.');
+    } catch (err) {
+      setMessage(
+        "Failed to resend OTP"
+      );
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Go back to step 1
-  const handleBack = () => {
-    setStep(1);
-    setMessage('');
   };
 
   return (
     <>
       {showForm && (
         <div className="nh-page-auth">
-        <div className="login-form-container">
-          <button className="close-btn" onClick={() => setShowForm(false)}>
-            &times; {/* Cross symbol for close */}
-          </button>
-          <h2>{role === 'admin' ? 'Admin Login' : 'User Login'}</h2>
-          
-          {step === 1 ? (
-            // Step 1: Email input form
-            <form onSubmit={initiateLogin} className="login-form">
-              <div className="input-group">
-                <input
-                  type="email"
-                  name="email"
-                  placeholder={`${role === 'admin' ? 'Admin Email' : 'Email'}`}
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="input-group">
-                <input
-                  type="password"
-                  name="password"
-                  placeholder={`${role === 'admin' ? 'Admin Password' : 'Password'}`}
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <button type="submit" className="submit-btn" disabled={isLoading}>
-                {isLoading ? 'Sending OTP...' : 'Get OTP'}
-              </button>
-            </form>
-          ) : (
-            // Step 2: OTP verification form
-            <form onSubmit={verifyOtp} className="login-form">
-              <p className="otp-info">
-                We've sent a verification code to <strong>{formData.email}</strong>
-              </p>
-              <div className="input-group">
-                <input
-                  type="text"
-                  name="otp"
-                  placeholder="Enter OTP"
-                  value={otp}
-                  onChange={handleOtpChange}
-                  required
-                  maxLength={6}
-                  className="otp-input"
-                />
-              </div>
-              <button type="submit" className="submit-btn" disabled={isLoading}>
-                {isLoading ? 'Verifying...' : 'Verify & Login'}
-              </button>
-              <div className="otp-actions">
-                <button 
-                  type="button" 
-                  className="text-btn" 
-                  onClick={resendOtp} 
-                  disabled={isLoading}
+          <div className="login-form-container">
+
+            <button
+              className="close-btn"
+              onClick={() =>
+                setShowForm(false)
+              }
+            >
+              ×
+            </button>
+
+            <h2>
+              {role === "admin"
+                ? "Admin Login"
+                : "User Login"}
+            </h2>
+
+            {step === 1 ? (
+              <form
+                onSubmit={initiateLogin}
+                className="login-form"
+              >
+                <div className="input-group">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={
+                      formData.email
+                    }
+                    onChange={
+                      handleChange
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={
+                      formData.password
+                    }
+                    onChange={
+                      handleChange
+                    }
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={
+                    isLoading
+                  }
                 >
-                  Resend OTP
+                  {isLoading
+                    ? "Sending OTP..."
+                    : "Get OTP"}
                 </button>
-                <button 
-                  type="button" 
-                  className="text-btn" 
-                  onClick={handleBack}
-                  disabled={isLoading}
-                >
-                  Change Email
-                </button>
-              </div>
-            </form>
-          )}
-          
-          {message && <p className={message.includes('success') || message.includes('sent') ? 'success' : 'error'}>{message}</p>}
-          
-          {step === 1 && (
-            role === 'user' ? (
-              <p>Don't have an account? <Link to="/register">Sign Up</Link></p>
+              </form>
             ) : (
-              <p>Not an admin? <Link to="/login">User Login</Link></p>
-            )
-          )}
-        </div>
+              <form
+                onSubmit={
+                  verifyOtp
+                }
+                className="login-form"
+              >
+                <p className="otp-info">
+                  We've sent OTP to
+                  <strong>
+                    {" "}
+                    {
+                      formData.email
+                    }
+                  </strong>
+                </p>
+
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={
+                      handleOtpChange
+                    }
+                    required
+                    maxLength={6}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={
+                    isLoading
+                  }
+                >
+                  {isLoading
+                    ? "Verifying..."
+                    : "Verify & Login"}
+                </button>
+
+                <div className="otp-actions">
+                  <button
+                    type="button"
+                    onClick={
+                      resendOtp
+                    }
+                  >
+                    Resend OTP
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setStep(1)
+                    }
+                  >
+                    Change Email
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {message && (
+              <p>{message}</p>
+            )}
+
+            {step === 1 && (
+              <p>
+                Don't have an
+                account?{" "}
+                <Link to="/register">
+                  Sign Up
+                </Link>
+              </p>
+            )}
+          </div>
         </div>
       )}
     </>
