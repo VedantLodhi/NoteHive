@@ -66,23 +66,30 @@ const CPTrivia = () => {
 
     const isCorrect = option === quizData[currentQuestion].answer;
     
+
     if (isCorrect) {
   const points = attemptsLeft === 2 ? 10 : 5;
 
-  setScore(prev => prev + points);
+  const updatedScore = score + points;
+
+  setScore(updatedScore);
 
   setSelectedAnswer(option);
 
   setTimeout(() => {
-    nextQuestion(score + points);
+    nextQuestion(updatedScore);
   }, 1000);
-} else {
+}
+
+else {
       setAttemptsLeft(prev => prev - 1);
       setSelectedAnswer(option);
       
       if (attemptsLeft === 2) {
-        setTimeout(() => setSelectedAnswer(null), 1000);
-      } else {
+  setTimeout(() => {
+    setSelectedAnswer(null);
+  }, 600);
+} else {
         setTimeout(() => nextQuestion(score), 1000);
       }
     }
@@ -294,10 +301,30 @@ const CPTrivia = () => {
             className="nh-card mb-8 rounded-nh-lg border border-nh-border-strong px-6 py-8 text-center"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nh-muted">Session complete</p>
-            <p className="mt-3 font-display text-3xl text-nh-text">Final score: {finalScore}</p>
-            <p className="mt-2 text-sm text-nh-muted">
-              {topic} · {difficulty}
-            </p>
+
+            <div className="mt-4 space-y-3">
+  <p className="font-display text-3xl text-nh-text">
+    Final Score: {finalScore}
+  </p>
+
+  <div className="flex justify-center gap-3 flex-wrap">
+    <span className="nh-tag bg-nh-accent-soft text-nh-text">
+      Scored: {finalScore}
+    </span>
+
+    <span className="nh-tag bg-nh-surface-2 text-nh-text">
+      Total: {quizData.length * 10}
+    </span>
+
+    <span className="nh-tag bg-nh-success/10 text-nh-success">
+      Accuracy: {Math.round((finalScore / (quizData.length * 10)) * 100)}%
+    </span>
+  </div>
+
+  <p className="text-sm text-nh-muted">
+    {topic} · {difficulty}
+  </p>
+</div>
             {typeof window !== "undefined" && localStorage.getItem("token") && (
               <button
                 type="button"
@@ -369,10 +396,22 @@ const CPTrivia = () => {
                 let state =
                   "cursor-pointer border-nh-border bg-nh-surface-2/50 text-nh-text hover:border-nh-accent hover:bg-nh-accent-soft/40";
                 if (selectedAnswer) {
-                  if (isCorrect) state = "border-nh-success/50 bg-nh-success/10 text-nh-text";
-                  else if (isSelected) state = "border-nh-danger/40 bg-nh-danger/10 text-nh-text";
-                  else state = "cursor-default border-transparent bg-nh-surface-2/30 text-nh-muted opacity-60";
-                }
+  if (
+    isCorrect &&
+    selectedAnswer === quizData[currentQuestion].answer
+  ) {
+    state =
+      "border-nh-success/50 bg-nh-success/10 text-nh-text";
+  } 
+  else if (isSelected) {
+    state =
+      "border-nh-danger/40 bg-nh-danger/10 text-nh-text";
+  } 
+  else {
+    state =
+      "cursor-default border-transparent bg-nh-surface-2/30 text-nh-muted opacity-60";
+  }
+}
 
                 return (
                   <motion.button
