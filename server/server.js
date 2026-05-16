@@ -44,11 +44,13 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const notesRoutes = require("./routes/notesRoutes");
 const triviaRoutes = require("./routes/triviaRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", notesRoutes);
 app.use("/api", triviaRoutes);
+app.use("/api", uploadRoutes);
 
 // Root route
 app.get("/", (req, res) => {
