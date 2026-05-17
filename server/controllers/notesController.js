@@ -5,7 +5,7 @@ const DOMPurify = require("isomorphic-dompurify");
 // ✅ Create Note (Any authenticated user can create notes)
 const createNote = async (req, res) => {
   try {
-    const { title, subject, content } = req.body;
+    const { title, subject, content, fileUrl, originalFileName, isUploadedFile } = req.body;
     if (!title || !subject || !content) {
       return res.status(400).json({ message: "All fields are required." });
     }
@@ -16,6 +16,9 @@ const createNote = async (req, res) => {
       title,
       subject,
       content: sanitizedContent,
+      fileUrl,
+      originalFileName,
+      isUploadedFile,
       createdBy: req.user._id, // Associate note with the logged-in user
       createdAt: new Date(),
     });
