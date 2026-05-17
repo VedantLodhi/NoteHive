@@ -40,48 +40,64 @@ const uploadNote = async (req, res) => {
 
     // Upload file to Cloudinary
     try {
-      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "raw", // Required for non-image files like PDF/DOCX
-        folder: "notehive_uploads",
-        public_id: `${Date.now()}-${req.file.originalname}`,
-      });
+      const uploadResult =
+        await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            resource_type: "auto",
+            folder: "notehive_uploads",
+
+            public_id:
+              `${Date.now()}-${req.file.originalname.replace(
+                /\.[^/.]+$/,
+                ""
+              )
+              }`
+          }
+        );
+
       fileUrl = uploadResult.secure_url;
+
     } catch (cloudErr) {
-      console.error("Cloudinary upload error:", cloudErr);
+      console.error(
+        "Cloudinary upload error:",
+        cloudErr
+      );
+
       return res.status(500).json({
         success: false,
-        message: "Cloud storage upload failed. Please verify your Cloudinary configuration.",
+        message:
+          "Cloud storage upload failed."
       });
     }
-
     // Delete temporary local file safely
     try {
-  if (fs.existsSync(req.file.path)) {
-    fs.unlinkSync(req.file.path);
-  }
-} catch (cleanupErr) {
-  console.log(
-    "Temp file cleanup failed:",
-    cleanupErr.message
-  );
-}
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    } catch (cleanupErr) {
+      console.log(
+        "Temp file cleanup failed:",
+        cleanupErr.message
+      );
+    }
 
     return res.json({
-  success: true,
-  fileName: req.file.originalname,
-  fileUrl: fileUrl,
+      success: true,
+      fileName: req.file.originalname,
+      fileUrl: fileUrl,
 
-  characters:
-    extractedText?.length || 0,
+      characters:
+        extractedText?.length || 0,
 
-  preview:
-    extractedText?.slice(0,500) || "",
+      preview:
+        extractedText?.slice(0, 500) || "",
 
-  fullText:
-    extractedText || "",
-});
+      fullText:
+        extractedText || "",
+    });
 
-  } catch(error){
+  } catch (error) {
 
     console.log(
       "UPLOAD ERROR:",
@@ -89,12 +105,12 @@ const uploadNote = async (req, res) => {
     );
 
     return res.status(500).json({
-      success:false,
-      message:"Upload failed"
+      success: false,
+      message: "Upload failed"
     });
   }
 };
 
 module.exports = {
- uploadNote
+  uploadNote
 };

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api";
-import { apiUrl } from "../config/apiBase";
 import PageLayout from "../components/layout/PageLayout";
 
 const Notes = () => {
@@ -253,7 +252,7 @@ const Notes = () => {
                 {note.isUploadedFile && note.fileUrl && (
                   <div className="flex gap-2">
                     <a
-                      href={note.fileUrl.startsWith("http") ? note.fileUrl : apiUrl(note.fileUrl)}
+                      href={note.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center rounded-full bg-nh-surface-2 p-2 text-nh-primary transition hover:bg-nh-primary hover:text-white"
@@ -262,8 +261,10 @@ const Notes = () => {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </a>
                     <a
-                      href={note.fileUrl.startsWith("http") ? note.fileUrl : apiUrl(note.fileUrl)}
-                      download={note.originalFileName || "download"}
+                      href={note.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={note.originalFileName}
                       className="inline-flex items-center justify-center rounded-full bg-nh-surface-2 p-2 text-nh-primary transition hover:bg-nh-primary hover:text-white"
                       title="Download original file"
                     >
