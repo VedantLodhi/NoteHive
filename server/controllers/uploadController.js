@@ -36,51 +36,7 @@ const uploadNote = async (req, res) => {
       extractedText = result.value;
     }
 
-    let fileUrl = "";
-
-    // Upload file to Cloudinary
-    try {
-      const uploadResult =
-        await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            resource_type: "auto",
-            folder: "notehive_uploads",
-
-            public_id:
-              `${Date.now()}-${req.file.originalname.replace(
-                /\.[^/.]+$/,
-                ""
-              )
-              }`
-          }
-        );
-
-      fileUrl = uploadResult.secure_url;
-
-    } catch (cloudErr) {
-      console.error(
-        "Cloudinary upload error:",
-        cloudErr
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Cloud storage upload failed."
-      });
-    }
-    // Delete temporary local file safely
-    try {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-    } catch (cleanupErr) {
-      console.log(
-        "Temp file cleanup failed:",
-        cleanupErr.message
-      );
-    }
+    const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
 
     return res.json({
       success: true,
