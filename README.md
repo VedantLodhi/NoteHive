@@ -1,27 +1,34 @@
-# NoteHive – Interactive Notes & Quiz Platform  
+# 🧠 NoteHive – AI-Powered Notes & Quiz Learning Platform
 
-**NoteHive** is a full-stack MERN application that allows users to **create, organize, and manage notes** while also testing their knowledge through **auto-generated quizzes** based on their notes.  
-The goal of this project was to build a secure, interactive, and user-friendly platform that enhances both **learning and retention**.  
+NoteHive is a full-stack MERN application designed to make learning smarter and more interactive. Users can create notes, upload study material, and generate AI-powered quizzes to improve retention through personalized learning workflows.
 
----
+## ✨ Features
 
-## 🎯 Features
-- ✍️ Create, update, and delete notes  
-- 🔐 Secure authentication using **JWT**  
-- 🔒 User data protection with **AES encryption**  
-- 📚 Auto-generated quizzes from notes to boost learning  
-- 📱 Responsive design with a clean UI built in **React**  
-- ⚡ Fast and scalable backend with **Node.js & Express**  
-- 🗄️ Data persistence with **MongoDB**  
+- ✍️ Create, edit, and organize notes seamlessly  
+- 📄 Upload PDF/DOCX files with automated text extraction  
+- 🤖 Generate AI-powered quizzes from study content  
+- 🔐 Secure authentication with JWT and protected routes  
+- 💾 Persistent document storage with future access support  
+- ⚡ Scalable REST APIs for content and file management  
+- 📱 Responsive and modern user interface  
 
----
+## 🛠 Tech Stack
 
-## 🛠️ Tech Stack
-- **Frontend:** React, CSS, JavaScript (ES6)  
-- **Backend:** Node.js, Express.js  
-- **Database:** MongoDB  
-- **Authentication:** JWT (JSON Web Token)  
-- **Encryption:** AES (Advanced Encryption Standard)  
+**Frontend:** React.js, JavaScript, Tailwind CSS  
+**Backend:** Node.js, Express.js, REST APIs  
+**Database:** MongoDB  
+**Authentication:** JWT, AES Encryption  
+**File Handling:** Multer, PDF-Parse, Mammoth  
+**AI:** Gemini API  
+**Deployment:** Vercel, Render  
 
----
+## 🚀 Highlights
 
+- AI-assisted learning workflows  
+- Secure full-stack MERN architecture  
+- Intelligent document processing system  
+- Persistent upload and retrieval functionality  
+
+## 👨‍💻 Author
+
+Vedant Lodhi  
